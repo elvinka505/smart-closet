@@ -11,6 +11,11 @@
         <button onclick="addWish()" class="btn">Добавить</button>
     </div>
 
+    <h3>Курсы валют</h3>
+    <#list rates?keys as key>
+        ${key} = ${rates[key]}
+    </#list>
+
     <table>
         <thead>
         <tr>
