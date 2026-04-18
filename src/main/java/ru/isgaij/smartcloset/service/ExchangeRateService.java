@@ -3,6 +3,7 @@ package ru.isgaij.smartcloset.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +20,7 @@ public class ExchangeRateService {
         this.restTemplate = restTemplate;
     }
 
+    @Cacheable("exchangeRates")
     public Map<String, Double> getSelectedRates() {
         try {
             Map<String, Object> response = this.restTemplate.getForObject(API_URL, Map.class);            Map<String, Double> allRates = (Map<String, Double>) response.get("rates");
