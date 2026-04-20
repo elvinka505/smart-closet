@@ -39,6 +39,9 @@ public class Item {
     @Column
     private LocalDate purchaseDate;
 
+    @Column
+    private String colorName;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

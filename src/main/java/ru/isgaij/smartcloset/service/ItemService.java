@@ -14,6 +14,7 @@ import ru.isgaij.smartcloset.repository.TagRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -22,12 +23,14 @@ public class ItemService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final TagRepository tagRepository;
+    private final ColorService colorService;
 
-    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, BrandRepository brandRepository, TagRepository tagRepository) {
+    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, BrandRepository brandRepository, TagRepository tagRepository,  ColorService colorService) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
         this.tagRepository = tagRepository;
+        this.colorService = colorService;
     }
 
     public List<Item> findAll() {
@@ -37,6 +40,11 @@ public class ItemService {
         return itemRepository.findById(id);
     }
     public Item save(Item item) {
+        if (item.getColor() != null && !item.getColor().isBlank()) {
+            String hex = item.getColor().replace("#", "");
+            Map<String, String> colorInfo = colorService.getColorInfo(hex);
+            item.setColorName(colorInfo.get("name"));
+        }
         return itemRepository.save(item);
     }
     public void deleteById(Long id) {

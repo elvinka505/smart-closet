@@ -1,22 +1,24 @@
 package ru.isgaij.smartcloset.controller;
 
-import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import ru.isgaij.smartcloset.service.ExchangeRateService;
+import org.springframework.web.bind.annotation.RequestParam;
+import ru.isgaij.smartcloset.service.ColorService;
 
 @Controller
 public class WishlistController {
 
+    private final ColorService colorService;
+
+    public WishlistController(ColorService colorService) {
+        this.colorService = colorService;
+    }
+
     @GetMapping("/wishlist")
-    public String wishlist(Model model) {
-        model.addAttribute("rates", exchangeRateService.getSelectedRates());
+    public String wishlist(@RequestParam(defaultValue = "FFFFFF") String hex, Model model) {
+        model.addAttribute("colorInfo", colorService.getColorInfo(hex));
+        model.addAttribute("hex", hex);
         return "wishlist/index";
     }
-
-    private final ExchangeRateService exchangeRateService;
-    public WishlistController(ExchangeRateService exchangeRateService) {
-        this.exchangeRateService = exchangeRateService;
-    }
-
 }

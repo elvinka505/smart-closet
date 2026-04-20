@@ -13,10 +13,6 @@
             <input type="text" name="name" value="${item.name!}" required>
         </div>
         <div>
-            <label>Цвет:</label>
-            <input type="text" name="color" value="${item.color!}">
-        </div>
-        <div>
             <label>Размер:</label>
             <input type="text" name="size" value="${item.size!}">
         </div>
@@ -30,7 +26,7 @@
         </div>
         <div>
             <label>Категория:</label>
-            <select name="category.id">
+            <select name="category">
                 <option value="">-- выбрать --</option>
                 <#list categories as cat>
                     <option value="${cat.id}"<#if item.category?? && item.category.id == cat.id> selected</#if>>${cat.name}</option>
@@ -39,12 +35,16 @@
         </div>
         <div>
             <label>Бренд:</label>
-            <select name="brand.id">
+            <select name="brand">
                 <option value="">-- выбрать --</option>
                 <#list brands as b>
                     <option value="${b.id}"<#if item.brand?? && item.brand.id == b.id> selected</#if>>${b.name}</option>
                 </#list>
             </select>
+        </div>
+        <div>
+            <label>Цвет:</label>
+            <input type="color" name="color" value="${item.color!'#FFFFFF'}">
         </div>
 
         <button type="submit">Сохранить</button>
