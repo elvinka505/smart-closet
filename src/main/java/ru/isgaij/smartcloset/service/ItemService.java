@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Service;
 import ru.isgaij.smartcloset.entity.Item;
+import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.repository.BrandRepository;
 import ru.isgaij.smartcloset.repository.CategoryRepository;
 import ru.isgaij.smartcloset.repository.ItemRepository;
@@ -65,5 +66,9 @@ public class ItemService {
         );
 
         return entityManager.createQuery(query).getResultList();
+    }
+
+    public List<Item> findAllByUser(User user) {
+        return itemRepository.findAllByUser(user);
     }
 }

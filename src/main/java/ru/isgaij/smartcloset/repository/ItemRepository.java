@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.isgaij.smartcloset.entity.Item;
+import ru.isgaij.smartcloset.entity.User;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT i FROM Item i WHERE i.user.id = :userId AND i.price > (SELECT AVG(i2.price) FROM Item i2 WHERE i2.user.id = :userId)")
     List<Item> findItemsAboveAveragePrice(@Param("userId") Long userId);
+
+    List<Item> findAllByUser(User user);
 }

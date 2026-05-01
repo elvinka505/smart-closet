@@ -4,10 +4,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.isgaij.smartcloset.entity.Item;
+import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.repository.BrandRepository;
 import ru.isgaij.smartcloset.repository.CategoryRepository;
-import ru.isgaij.smartcloset.repository.ItemRepository;
+import ru.isgaij.smartcloset.repository.UserRepository;
 import ru.isgaij.smartcloset.service.ItemService;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/items")
@@ -15,16 +18,20 @@ public class ItemController {
     private final ItemService itemService;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
+    private final UserRepository userRepository;
 
-    public ItemController(ItemService itemService, CategoryRepository categoryRepository, BrandRepository brandRepository) {
+    public ItemController(ItemService itemService, CategoryRepository categoryRepository, BrandRepository brandRepository, UserRepository userRepository) {
         this.itemService = itemService;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("items", itemService.findAll());
+    public String list(Model model, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        model.addAttribute("items", itemService.findAllByUser(user));
         return "item/list";
     }
 
@@ -37,7 +44,10 @@ public class ItemController {
     }
 
     @PostMapping
-    public String save(@ModelAttribute Item item) {
+    public String save(@ModelAttribute Item item, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        item.setUser(user);
         itemService.save(item);
         return "redirect:/items";
     }

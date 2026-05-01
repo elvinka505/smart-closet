@@ -17,7 +17,7 @@
         <#list items as item>
             <tr>
                 <td>${item.name!}</td>
-                <td>${item.color!}</td>
+                <td>${item.colorName!itemColor!}</td>
                 <td>${item.size!}</td>
                 <td>${item.season!}</td>
                 <td>${item.price!}</td>
