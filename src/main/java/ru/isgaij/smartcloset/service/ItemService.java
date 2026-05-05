@@ -40,7 +40,16 @@ public class ItemService {
     public Optional<Item> findById(Long id) {
         return itemRepository.findById(id);
     }
+
     public Item save(Item item) {
+        if (item.getId() != null && (item.getColor() == null || item.getColor().isBlank())) {
+            Optional<Item> existing = itemRepository.findById(item.getId());
+            if (existing.isPresent()) {
+                item.setColor(existing.get().getColor());
+                item.setColorName(existing.get().getColorName());
+                item.setComplementColor(existing.get().getComplementColor());
+            }
+        }
         if (item.getColor() != null && !item.getColor().isBlank()) {
             String hex = item.getColor().replace("#", "");
             Map<String, String> colorInfo = colorService.getColorInfo(hex);
@@ -75,9 +84,12 @@ public class ItemService {
 
     public List<Item> findMatchingItems(Item item) {
         if (item.getComplementColor() == null || item.getComplementColor().isBlank() || item.getUser() == null) {
+            System.out.println("DEBUG: complementColor пустой или user null для item=" + item.getName());
             return List.of();
         }
-        return itemRepository.findByUserAndColor(item.getUser(), item.getComplementColor());
+        System.out.println("DEBUG: ищем по user=" + item.getUser().getId() + " color=" + item.getComplementColor());
+        List<Item> result = itemRepository.findByUserAndColorIgnoreCase(item.getUser(), item.getComplementColor());
+        System.out.println("DEBUG: найдено " + result.size() + " совпадений");
+        return result;
     }
-
 }

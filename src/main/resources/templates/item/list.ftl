@@ -32,10 +32,14 @@
                     </form>
                 </td>
                 <td>
-                    <#if item.complementColor?? && item.complementColor != "">
-                        Подходит к цвету: ${item.complementColor}
+                    <#assign matches = matchingItems[item.id?c]![]>
+                    <#if matches?size gt 0>
+                        Подходит к:
+                        <#list matches as match>
+                            ${match.name}<#if match_has_next>, </#if>
+                        </#list>
                     <#else>
-                        —
+                        Нет подходящих вещей
                     </#if>
                 </td>
             </tr>

@@ -11,6 +11,9 @@ import ru.isgaij.smartcloset.repository.UserRepository;
 import ru.isgaij.smartcloset.service.ItemService;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/items")
@@ -31,7 +34,17 @@ public class ItemController {
     public String list(Model model, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        model.addAttribute("items", itemService.findAllByUser(user));
+
+        List<Item> items = itemService.findAllByUser(user);
+
+        Map<String, List<Item>> matchingItems = new HashMap<>();
+        for (Item item : items) {
+            matchingItems.put(String.valueOf(item.getId()), itemService.findMatchingItems(item));
+        }
+
+        model.addAttribute("items", items);
+        model.addAttribute("matchingItems", matchingItems);
+
         return "item/list";
     }
 

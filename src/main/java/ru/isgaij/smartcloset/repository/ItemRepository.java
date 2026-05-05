@@ -19,5 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByUser(User user);
 
-    List<Item> findByUserAndColor(User user, String color);
+    @Query("SELECT i FROM Item i WHERE i.user = :user AND LOWER(i.color) = LOWER(:color)")
+    List<Item> findByUserAndColorIgnoreCase(@Param("user") User user, @Param("color") String color);
 }
