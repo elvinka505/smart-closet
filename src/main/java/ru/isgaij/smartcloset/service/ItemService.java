@@ -45,6 +45,7 @@ public class ItemService {
             String hex = item.getColor().replace("#", "");
             Map<String, String> colorInfo = colorService.getColorInfo(hex);
             item.setColorName(colorInfo.get("name"));
+            item.setComplementColor(colorInfo.get("complement"));
         }
         return itemRepository.save(item);
     }
@@ -71,4 +72,12 @@ public class ItemService {
     public List<Item> findAllByUser(User user) {
         return itemRepository.findAllByUser(user);
     }
+
+    public List<Item> findMatchingItems(Item item) {
+        if (item.getComplementColor() == null || item.getComplementColor().isBlank() || item.getUser() == null) {
+            return List.of();
+        }
+        return itemRepository.findByUserAndColor(item.getUser(), item.getComplementColor());
+    }
+
 }

@@ -42,6 +42,9 @@ public class Item {
     @Column
     private String colorName;
 
+    @Column
+    private String complementColor;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

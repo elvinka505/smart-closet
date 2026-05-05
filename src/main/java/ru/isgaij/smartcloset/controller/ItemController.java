@@ -67,4 +67,14 @@ public class ItemController {
         itemService.deleteById(id);
         return "redirect:/items";
     }
+
+    @PostMapping("/{id}")
+    public String update(@PathVariable Long id, @ModelAttribute Item item, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        item.setId(id);
+        item.setUser(user);
+        itemService.save(item);
+        return "redirect:/items";
+    }
 }

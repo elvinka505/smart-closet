@@ -66,3 +66,17 @@ function deleteWish(id) {
         }
     }).then(() => loadWishlist());
 }
+
+const picker = document.getElementById("colorPicker");
+if (picker) {
+    picker.addEventListener("change", function () {
+        const hex = this.value.replace("#", "");
+        fetch("/api/color?hex=" + hex)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("colorName").textContent = data.name || "";
+                document.getElementById("complementInfo").textContent =
+                    data.complement ? "Дополняющий цвет: " + data.complement : "";
+            });
+    });
+}

@@ -2,7 +2,7 @@
 <@layout.page title="Вещь">
     <h1><#if item.id??>Редактировать<#else>Добавить</#if> вещь</h1>
 
-    <form action="/items" method="post">
+    <form action="/items<#if item.id??>/${item.id}</#if>" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
         <#if item.id??>
             <input type="hidden" name="id" value="${item.id}">
@@ -44,8 +44,10 @@
         </div>
         <div>
             <label>Цвет:</label>
-            <input type="color" name="color" value="${item.color!'#FFFFFF'}">
+            <input type="color" name="color" id="colorPicker" value="${item.color!'#FFFFFF'}">
+            <span id="colorName" style="margin-left: 10px">${item.colorName!""}</span>
         </div>
+        <div id="complementInfo" style="margin-top:5px"></div>
 
         <button type="submit">Сохранить</button>
     </form>

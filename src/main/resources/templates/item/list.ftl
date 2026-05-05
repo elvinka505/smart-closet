@@ -13,11 +13,12 @@
             <th>Категория</th>
             <th>Бренд</th>
             <th>Действия</th>
+            <th>Рекомендация</th>
         </tr>
         <#list items as item>
             <tr>
                 <td>${item.name!}</td>
-                <td>${item.colorName!itemColor!}</td>
+                <td>${item.colorName!item.color!}</td>
                 <td>${item.size!}</td>
                 <td>${item.season!}</td>
                 <td>${item.price!}</td>
@@ -29,6 +30,13 @@
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
                         <button type="submit" class="btn btn-danger">Удалить</button>
                     </form>
+                </td>
+                <td>
+                    <#if item.complementColor?? && item.complementColor != "">
+                        Подходит к цвету: ${item.complementColor}
+                    <#else>
+                        —
+                    </#if>
                 </td>
             </tr>
         </#list>

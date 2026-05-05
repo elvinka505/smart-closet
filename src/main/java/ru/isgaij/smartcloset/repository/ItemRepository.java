@@ -18,4 +18,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findItemsAboveAveragePrice(@Param("userId") Long userId);
 
     List<Item> findAllByUser(User user);
+
+    List<Item> findByUserAndColor(User user, String color);
 }
