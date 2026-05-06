@@ -1,17 +1,18 @@
 package ru.isgaij.smartcloset.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.isgaij.smartcloset.dto.RegisterForm;
 import ru.isgaij.smartcloset.service.UserService;
 
 @Controller
 public class AuthController {
-    private UserService userService;
+    private final UserService userService;
 
     public AuthController(UserService userService) {
         this.userService = userService;
@@ -24,7 +25,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute RegisterForm form) {
+    public String register(@Valid @ModelAttribute("form") RegisterForm form,
+                           BindingResult bindingResult,
+                           Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errors", bindingResult);
+            return "auth/register";
+        }
+
         userService.register(form);
         return "redirect:/login";
     }

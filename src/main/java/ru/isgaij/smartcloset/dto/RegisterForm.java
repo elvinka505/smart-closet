@@ -1,5 +1,8 @@
 package ru.isgaij.smartcloset.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +11,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 public class RegisterForm {
+
+    @NotBlank(message = "Введите имя пользователя")
+    @Size(min = 2, max = 50, message = "Имя пользователя должно содержать от 2 до 50 символов")
     private String username;
+
+    @NotBlank(message = "Введите email")
+    @Email(message = "Введите корректный email")
     private String email;
+
+    @NotBlank(message = "Введите пароль")
+    @Size(min = 6, max = 100, message = "Пароль должен содержать минимум 6 символов")
     private String password;
 }

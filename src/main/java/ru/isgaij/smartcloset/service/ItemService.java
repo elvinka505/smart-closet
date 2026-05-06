@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.isgaij.smartcloset.entity.Item;
 import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.repository.BrandRepository;
@@ -13,13 +14,17 @@ import ru.isgaij.smartcloset.repository.CategoryRepository;
 import ru.isgaij.smartcloset.repository.ItemRepository;
 import ru.isgaij.smartcloset.repository.TagRepository;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class ItemService {
+    private static final Logger log = LoggerFactory.getLogger(ItemService.class);
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
@@ -33,14 +38,17 @@ public class ItemService {
         this.tagRepository = tagRepository;
         this.colorService = colorService;
     }
-
+    @Transactional(readOnly = true)
     public List<Item> findAll() {
         return itemRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
     public Optional<Item> findById(Long id) {
         return itemRepository.findById(id);
     }
 
+    @Transactional
     public Item save(Item item) {
         if (item.getId() != null && (item.getColor() == null || item.getColor().isBlank())) {
             Optional<Item> existing = itemRepository.findById(item.getId());
@@ -58,6 +66,8 @@ public class ItemService {
         }
         return itemRepository.save(item);
     }
+
+    @Transactional
     public void deleteById(Long id) {
         itemRepository.deleteById(id);
     }
@@ -65,6 +75,7 @@ public class ItemService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Transactional(readOnly = true)
     public List<Item> findExpensiveItems(Long userId, BigDecimal minPrice) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Item> query = cb.createQuery(Item.class);
@@ -78,18 +89,20 @@ public class ItemService {
         return entityManager.createQuery(query).getResultList();
     }
 
+    @Transactional(readOnly = true)
     public List<Item> findAllByUser(User user) {
         return itemRepository.findAllByUser(user);
     }
 
+    @Transactional(readOnly = true)
     public List<Item> findMatchingItems(Item item) {
         if (item.getComplementColor() == null || item.getComplementColor().isBlank() || item.getUser() == null) {
-            System.out.println("DEBUG: complementColor пустой или user null для item=" + item.getName());
+            log.debug("complementColor пустой или user null для item={}", item.getName());
             return List.of();
         }
-        System.out.println("DEBUG: ищем по user=" + item.getUser().getId() + " color=" + item.getComplementColor());
+        log.debug("ищем по user={} color={}", item.getUser().getId(), item.getComplementColor());
         List<Item> result = itemRepository.findByUserAndColorIgnoreCase(item.getUser(), item.getComplementColor());
-        System.out.println("DEBUG: найдено " + result.size() + " совпадений");
+        log.debug("найдено {} совпадений", result.size());
         return result;
     }
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+    public static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiError> handleRuntimeException(RuntimeException e) {

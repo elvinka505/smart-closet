@@ -13,6 +13,7 @@
         <div class="nav-links">
             <a href="/items">Мои вещи</a>
             <a href="/wishlist">Вишлист</a>
+            <a href="/purchases">Покупки</a>
             <#if _csrf??>
                 <form action="/logout" method="post" style="display:inline">
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">

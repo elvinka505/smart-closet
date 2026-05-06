@@ -2,6 +2,7 @@ package ru.isgaij.smartcloset.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.isgaij.smartcloset.dto.RegisterForm;
 import ru.isgaij.smartcloset.entity.Role;
 import ru.isgaij.smartcloset.entity.User;
@@ -22,6 +23,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public void register(RegisterForm form) {
         User user = new User();
         user.setUsername(form.getUsername());

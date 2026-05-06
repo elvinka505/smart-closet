@@ -1,0 +1,46 @@
+@host = http://localhost:8080
+
+### 1. Получить страницу логина и вытащить CSRF
+GET {{host}}/login
+
+> {%
+    const html = response.body;
+    const tokenMatch = html.match(/name="_csrf" value="([^"]+)"/);
+
+    if (tokenMatch) {
+        client.global.set("csrfToken", tokenMatch[1]);
+    }
+%}
+
+###
+
+### 2. Войти под админом
+POST {{host}}/login
+Content-Type: application/x-www-form-urlencoded
+
+username=elvina_admin&password=Elvinablossom28&_csrf={{csrfToken}}
+
+###
+
+### 3. Получить wishlist текущего пользователя
+GET {{host}}/api/wishlist
+Accept: application/json
+
+###
+
+### 4. Добавить элемент в wishlist
+POST {{host}}/api/wishlist
+Content-Type: application/json
+
+{
+  "name": "Белые кроссовки",
+  "price": 5990,
+  "url": "https://example.com/sneakers",
+  "note": "Хочу купить к лету"
+}
+
+###
+
+### 5. Удалить элемент из wishlist по id
+DELETE {{host}}/api/wishlist/1
+Accept: application/json

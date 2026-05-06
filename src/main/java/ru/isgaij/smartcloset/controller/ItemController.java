@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.isgaij.smartcloset.entity.Item;
 import ru.isgaij.smartcloset.entity.User;
+import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
 import ru.isgaij.smartcloset.repository.BrandRepository;
 import ru.isgaij.smartcloset.repository.CategoryRepository;
 import ru.isgaij.smartcloset.repository.UserRepository;
@@ -33,7 +34,7 @@ public class ItemController {
     @GetMapping
     public String list(Model model, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         List<Item> items = itemService.findAllByUser(user);
 
@@ -59,16 +60,24 @@ public class ItemController {
     @PostMapping
     public String save(@ModelAttribute Item item, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         item.setUser(user);
         itemService.save(item);
         return "redirect:/items";
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         Item item = itemService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+
+        if (!item.getUser().getId().equals(user.getId())) {
+            throw new ResourceNotFoundException("Item not found");
+        }
+
         model.addAttribute("item", item);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("brands", brandRepository.findAll());
@@ -76,7 +85,17 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Item item = itemService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+
+        if (!item.getUser().getId().equals(user.getId())) {
+            throw new ResourceNotFoundException("Item not found");
+        }
+
         itemService.deleteById(id);
         return "redirect:/items";
     }
@@ -84,7 +103,15 @@ public class ItemController {
     @PostMapping("/{id}")
     public String update(@PathVariable Long id, @ModelAttribute Item item, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Item existingItem = itemService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+
+        if (!existingItem.getUser().getId().equals(user.getId())) {
+            throw new ResourceNotFoundException("Item not found");
+        }
+
         item.setId(id);
         item.setUser(user);
         itemService.save(item);
