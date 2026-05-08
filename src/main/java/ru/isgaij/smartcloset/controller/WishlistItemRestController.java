@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
+import ru.isgaij.smartcloset.dto.WishlistItemRequest;
+import ru.isgaij.smartcloset.dto.WishlistItemResponse;
 import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.entity.WishlistItem;
 import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
@@ -26,19 +28,29 @@ public class WishlistItemRestController {
 
     @GetMapping
     @Operation(summary = "Get current user's wishlist items")
-    public List<WishlistItem> getWishlistItems(Principal principal) {
+    public List<WishlistItemResponse> getWishlistItems(Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return wishlistItemService.findAllByUserId(user.getId());
+        return wishlistItemService.findAllByUserId(user.getId())
+                .stream()
+                .map(WishlistItemResponse::from)
+                .toList();
     }
 
     @PostMapping
     @Operation(summary = "Add item to current user's wishlist")
-    public WishlistItem addWishlistItem(@RequestBody WishlistItem wishlistItem, Principal principal) {
+    public WishlistItemResponse addWishlistItem(@RequestBody WishlistItemRequest request, Principal principal) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        wishlistItem.setUser(user);
-        return wishlistItemService.save(wishlistItem);
+
+        WishlistItem item = new WishlistItem();
+        item.setName(request.getName());
+        item.setPrice(request.getPrice());
+        item.setUrl(request.getUrl());
+        item.setNote(request.getNote());
+        item.setUser(user);
+
+        return WishlistItemResponse.from(wishlistItemService.save(item));
     }
 
     @DeleteMapping("/{id}")
