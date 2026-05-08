@@ -22,12 +22,10 @@ public class ColorService {
     @Cacheable("colorInfo")
     public Map<String, String> getColorInfo(String hex) {
         try {
-            // Запрос 1 — название цвета
             String url1 = "https://www.thecolorapi.com/id?hex=" + hex;
             Map<String, Object> response1 = restTemplate.getForObject(url1, Map.class);
             Map<String, Object> nameObj = (Map<String, Object>) response1.get("name");
 
-            // Запрос 2 — дополняющий цвет
             String url2 = "https://www.thecolorapi.com/scheme?hex=" + hex + "&mode=complement";
             Map<String, Object> response2 = restTemplate.getForObject(url2, Map.class);
             List<Map<String, Object>> colors = (List<Map<String, Object>>) response2.get("colors");

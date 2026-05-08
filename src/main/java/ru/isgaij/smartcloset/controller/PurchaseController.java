@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.isgaij.smartcloset.entity.Purchase;
 import ru.isgaij.smartcloset.entity.User;
-import ru.isgaij.smartcloset.repository.UserRepository;
+import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
 import ru.isgaij.smartcloset.service.ItemService;
 import ru.isgaij.smartcloset.service.PurchaseService;
+import ru.isgaij.smartcloset.service.UserService;
 
 import java.security.Principal;
 
@@ -18,19 +19,19 @@ import java.security.Principal;
 @RequestMapping("/purchases")
 public class PurchaseController {
     private final PurchaseService purchaseService;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ItemService itemService;
 
-    public PurchaseController(PurchaseService purchaseService, UserRepository userRepository, ItemService itemService) {
+    public PurchaseController(PurchaseService purchaseService, UserService userService, ItemService itemService) {
         this.purchaseService = purchaseService;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.itemService = itemService;
     }
 
     @GetMapping
     public String purchase(Model model, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         model.addAttribute("purchases", purchaseService.findAllByUserId(user.getId()));
         return "purchase/list";
@@ -38,8 +39,8 @@ public class PurchaseController {
 
     @GetMapping("/new")
     public String newPurchase(Model model, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         model.addAttribute("purchase", new Purchase());
         model.addAttribute("items", itemService.findAllByUser(user));
@@ -49,8 +50,8 @@ public class PurchaseController {
 
     @PostMapping
     public String savePurchase(@ModelAttribute Purchase purchase, Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         purchase.setUser(user);
         purchaseService.save(purchase);

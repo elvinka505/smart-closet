@@ -9,6 +9,7 @@ import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.repository.RoleRepository;
 import ru.isgaij.smartcloset.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -36,5 +37,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         user.setRoles(Set.of(role));
         userRepository.save(user);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
