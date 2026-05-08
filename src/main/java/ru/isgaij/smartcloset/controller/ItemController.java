@@ -1,8 +1,11 @@
 package ru.isgaij.smartcloset.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.isgaij.smartcloset.dto.ItemForm;
 import ru.isgaij.smartcloset.entity.Item;
 import ru.isgaij.smartcloset.entity.User;
 import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
@@ -51,17 +54,28 @@ public class ItemController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("item", new Item());
+        model.addAttribute("form", new ItemForm());
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("brands", brandRepository.findAll());
         return "item/form";
     }
 
     @PostMapping
-    public String save(@ModelAttribute Item item, Principal principal) {
+    public String save(@Valid @ModelAttribute("form") ItemForm form,
+                       BindingResult bindingResult,
+                       Principal principal,
+                       Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errors", bindingResult);
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("brands", brandRepository.findAll());
+            return "item/form";
+        }
+
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        item.setUser(user);
+
+        Item item = itemService.fromForm(form, user);
         itemService.save(item);
         return "redirect:/items";
     }
@@ -78,7 +92,8 @@ public class ItemController {
             throw new ResourceNotFoundException("Item not found");
         }
 
-        model.addAttribute("item", item);
+        ItemForm form = itemService.toForm(item);
+        model.addAttribute("form", form);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("brands", brandRepository.findAll());
         return "item/form";
@@ -100,8 +115,13 @@ public class ItemController {
         return "redirect:/items";
     }
 
+
     @PostMapping("/{id}")
-    public String update(@PathVariable Long id, @ModelAttribute Item item, Principal principal) {
+    public String update(@PathVariable Long id,
+                         @Valid @ModelAttribute("form") ItemForm form,
+                         BindingResult bindingResult,
+                         Principal principal,
+                         Model model) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -112,8 +132,15 @@ public class ItemController {
             throw new ResourceNotFoundException("Item not found");
         }
 
-        item.setId(id);
-        item.setUser(user);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errors", bindingResult);
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("brands", brandRepository.findAll());
+            return "item/form";
+        }
+
+        form.setId(id);
+        Item item = itemService.fromForm(form, user);
         itemService.save(item);
         return "redirect:/items";
     }

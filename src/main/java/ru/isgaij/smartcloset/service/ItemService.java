@@ -7,8 +7,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.isgaij.smartcloset.dto.ItemForm;
 import ru.isgaij.smartcloset.entity.Item;
 import ru.isgaij.smartcloset.entity.User;
+import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
 import ru.isgaij.smartcloset.repository.BrandRepository;
 import ru.isgaij.smartcloset.repository.CategoryRepository;
 import ru.isgaij.smartcloset.repository.ItemRepository;
@@ -28,14 +30,12 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
-    private final TagRepository tagRepository;
     private final ColorService colorService;
 
     public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, BrandRepository brandRepository, TagRepository tagRepository,  ColorService colorService) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
-        this.tagRepository = tagRepository;
         this.colorService = colorService;
     }
     @Transactional(readOnly = true)
@@ -104,5 +104,54 @@ public class ItemService {
         List<Item> result = itemRepository.findByUserAndColorIgnoreCase(item.getUser(), item.getComplementColor());
         log.debug("найдено {} совпадений", result.size());
         return result;
+    }
+
+    public Item fromForm(ItemForm form, User user) {
+        Item item = new Item();
+        if (form.getId() != null) {
+            item = itemRepository.findById(form.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+        }
+
+        item.setId(form.getId());
+        item.setName(form.getName());
+        item.setSize(form.getSize());
+        item.setSeason(form.getSeason());
+        item.setPrice(form.getPrice());
+        item.setColor(form.getColor());
+        item.setUser(user);
+
+        if (form.getCategoryId() != null) {
+            item.setCategory(categoryRepository.findById(form.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found")));
+        } else {
+            item.setCategory(null);
+        }
+
+        if (form.getBrandId() != null) {
+            item.setBrand(brandRepository.findById(form.getBrandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found")));
+        } else {
+            item.setBrand(null);
+        }
+
+        return item;
+    }
+
+    public ItemForm toForm(Item item) {
+        ItemForm form = new ItemForm();
+        form.setId(item.getId());
+        form.setName(item.getName());
+        form.setSize(item.getSize());
+        form.setSeason(item.getSeason());
+        form.setPrice(item.getPrice());
+        form.setColor(item.getColor());
+        if (item.getCategory() != null) {
+            form.setCategoryId(item.getCategory().getId());
+        }
+        if (item.getBrand() != null) {
+            form.setBrandId(item.getBrand().getId());
+        }
+        return form;
     }
 }
