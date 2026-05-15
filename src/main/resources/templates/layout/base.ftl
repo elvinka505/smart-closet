@@ -14,6 +14,9 @@
             <a href="/items">Мои вещи</a>
             <a href="/wishlist">Вишлист</a>
             <a href="/purchases">Покупки</a>
+            <#if isAdmin?? && isAdmin>
+                <a href="/admin">Админ</a>
+            </#if>
             <#if _csrf??>
                 <form action="/logout" method="post" style="display:inline">
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">

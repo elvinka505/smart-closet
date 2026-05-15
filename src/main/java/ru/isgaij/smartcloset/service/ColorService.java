@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,18 +21,36 @@ public class ColorService {
     @Cacheable("colorInfo")
     public Map<String, String> getColorInfo(String hex) {
         try {
-            String url1 = "https://www.thecolorapi.com/id?hex=" + hex;
-            Map<String, Object> response1 = restTemplate.getForObject(url1, Map.class);
-            Map<String, Object> nameObj = (Map<String, Object>) response1.get("name");
+            String cleanHex = hex.replace("#", "");
 
-            String url2 = "https://www.thecolorapi.com/scheme?hex=" + hex + "&mode=complement";
-            Map<String, Object> response2 = restTemplate.getForObject(url2, Map.class);
-            List<Map<String, Object>> colors = (List<Map<String, Object>>) response2.get("colors");
-            Map<String, Object> complementHex = (Map<String, Object>) ((Map<String, Object>) colors.get(1)).get("hex");
+            // Добавляем User-Agent чтобы обойти блокировку Cloudflare
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("User-Agent", "Mozilla/5.0 (compatible; SmartCloset/1.0)");
+            org.springframework.http.HttpEntity<String> entity =
+                    new org.springframework.http.HttpEntity<>(headers);
+
+            String url = "https://colornames.org/search/json/?hex=" + cleanHex;
+            org.springframework.http.ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    org.springframework.http.HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+
+            Map<String, Object> body = response.getBody();
+            String name = (body != null && body.get("name") != null)
+                    ? (String) body.get("name")
+                    : "#" + cleanHex;
+
+            // Дополнительный цвет — считаем сами
+            int r = Integer.parseInt(cleanHex.substring(0, 2), 16);
+            int g = Integer.parseInt(cleanHex.substring(2, 4), 16);
+            int b = Integer.parseInt(cleanHex.substring(4, 6), 16);
+            String complement = String.format("%02X%02X%02X", 255 - r, 255 - g, 255 - b);
 
             Map<String, String> result = new HashMap<>();
-            result.put("name", (String) nameObj.get("value"));
-            result.put("complement", (String) complementHex.get("value"));
+            result.put("name", name);
+            result.put("complement", complement);
             return result;
 
         } catch (Exception e) {

@@ -12,6 +12,7 @@ import ru.isgaij.smartcloset.exception.ResourceNotFoundException;
 import ru.isgaij.smartcloset.repository.BrandRepository;
 import ru.isgaij.smartcloset.repository.CategoryRepository;
 import ru.isgaij.smartcloset.repository.UserRepository;
+import ru.isgaij.smartcloset.service.ColorService;
 import ru.isgaij.smartcloset.service.ItemService;
 
 import java.security.Principal;
@@ -26,12 +27,14 @@ public class ItemController {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final UserRepository userRepository;
+    private final ColorService colorService;
 
-    public ItemController(ItemService itemService, CategoryRepository categoryRepository, BrandRepository brandRepository, UserRepository userRepository) {
+    public ItemController(ItemService itemService, CategoryRepository categoryRepository, BrandRepository brandRepository, UserRepository userRepository, ColorService colorService) {
         this.itemService = itemService;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
         this.userRepository = userRepository;
+        this.colorService = colorService;
     }
 
     @GetMapping
@@ -46,8 +49,18 @@ public class ItemController {
             matchingItems.put(String.valueOf(item.getId()), itemService.findMatchingItems(item));
         }
 
+        Map<String, String> colorNames = new HashMap<>();
+        for (Item item : items) {
+            if (item.getColor() != null && !item.getColor().isEmpty()) {
+                String hex = item.getColor().replace("#", "");
+                Map<String, String> info = colorService.getColorInfo(hex);
+                colorNames.put(String.valueOf(item.getId()), info.getOrDefault("name", item.getColor()));
+            }
+        }
+
         model.addAttribute("items", items);
         model.addAttribute("matchingItems", matchingItems);
+        model.addAttribute("colorNames", colorNames);
 
         return "item/list";
     }
