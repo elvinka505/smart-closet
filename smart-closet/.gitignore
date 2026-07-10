@@ -1,5 +1,4 @@
 target/
-<<<<<<< HEAD
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -34,10 +33,3 @@ build/
 
 ### macOS ###
 .DS_Store
-=======
-.idea/
-*.iml
-.DS_Store
-.env
-uploads/
->>>>>>> main
